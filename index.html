@@ -426,8 +426,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 
 <main class="wrap">
   <div id="banner" class="banner" hidden>この画面では記録を保存できません（プライベートブラウズなど）。練習はできますが、閉じると記録が消えます。</div>
-  <div id="view" aria-live="polite"></div>
+  <div id="bootErr" class="banner" hidden></div>
+  <div id="view" aria-live="polite"><div class="banner" style="margin-top:12px;line-height:1.8"><b>読み込み中…</b><br>この文が消えない時は、アプリのプログラムが動いていません。index.html や zip のファイルを直接開くと、iPhone の「ファイルの下見」ではプログラムが動かないためです。<br>Safari で <b>https://genmaojun.github.io/eiken2/</b> を開いてください。</div></div>
 </main>
+<script>
+// 起動や操作の途中で止まった時に、原因を画面に出す（写真で送ってもらえば直せる）
+window.addEventListener("error", function(e){
+  var b = document.getElementById("bootErr"); if(!b) return;
+  var os = (navigator.userAgent.match(/OS [\d_]+|Android [\d.]+/) || ["?"])[0].replace(/_/g, ".");
+  b.hidden = false;
+  b.textContent = "エラーが出ました。この画面を写真で送ってください：" + (e.message || "不明") + "（" + (e.lineno || 0) + "行目）／" + os + "（押すと消えます）";
+  b.onclick = function(){ b.hidden = true; };
+});
+</script>
 
 <nav class="tabs" aria-label="メニュー">
   <div class="tabs-in">
