@@ -418,6 +418,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .bigstart small{font-size:.85rem;font-weight:400;opacity:.9}
 .simplegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
 .simplegrid .btn{min-height:64px;font-size:1.05rem;font-weight:700}
+.colorline{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 12px;color:var(--muted);font-size:.9rem}
 </style>
 </head>
 <body>
@@ -724,7 +725,7 @@ function sentences(t){ return (t.match(/[^.!?]+[.!?]+["”]?/g) || [t]).map(x =>
 const KEY = "eiken2-trainer-v1";
 // 声・速さ・高さ・アクセント・効果音・テーマは WORDCRAFT と同じ既定（速さ 0.85・高さ 1・米・音あり・土）
 const SKINS = [["tactical","タクティカル"],["tsuchi","土"],["midori","緑"],["volley","バレー"],["dark","ダーク"],["light","ライト"],["auto","自動"]];
-const DEF = {v:1, xp:0, days:{}, stats:{}, items:{}, wrong:{}, cards:{}, drafts:{}, done:{}, target:[], g:{}, passtan:{}, settings:{rate:0.85, voice:"", accent:"en-US", pitch:1, sound:true, skin:"auto", dates:{apply:"2026-12-14", first:"2027-01-24", second:"2027-03-07"}}};
+const DEF = {v:1, xp:0, days:{}, stats:{}, items:{}, wrong:{}, cards:{}, drafts:{}, done:{}, target:[], g:{}, passtan:{}, settings:{rate:0.85, voice:"", accent:"en-US", pitch:1, sound:true, skin:"light", dates:{apply:"2026-12-14", first:"2027-01-24", second:"2027-03-07"}}};
 function clampRate(r){ r = parseFloat(r) || 0.85; return Math.max(0.5, Math.min(1.2, r)); }
 let canSave = true;
 function fresh(){ return JSON.parse(JSON.stringify(DEF)); }
@@ -902,7 +903,7 @@ const TTS = {
   },
   whyText(r){
     return (r || this.reason) === "noen"
-      ? "この端末（ブラウザ）には英語の声が入っていません。日本語の声で読むと発音が崩れるので、読み上げを止めました。iPhone は Safari で開けば英語の声があります。パソコンは Microsoft Edge で開くか、Windows の設定（時刻と言語 → 音声）で英語（米国）の音声を足してください。"
+      ? "この画面には英語の声がありません（日本語の声だと発音が崩れるので止めました）。iPhone の Safari か、パソコンの Microsoft Edge なら英語で聞けます。"
       : "声が出ませんでした。iPhone なら Safari で開き、消音モードと音量も確かめてください。";
   },
   stop(){ this.token++; if(this.ok){ try { speechSynthesis.cancel(); } catch(e){} } },
@@ -2111,6 +2112,7 @@ function renderSimpleHome(){
       '<button class="btn" data-act="s19">1900語 10問</button>' +
     "</div>" +
     (nWrong ? '<button class="btn wide" data-act="review">間違えた問題（' + nWrong + "問）</button>" : "") +
+    '<div class="colorline"><span>画面の色</span>' + segHtml("skin", [["light","白"],["dark","黒"]], S.settings.skin) + "</div>" +
     settingsHtml(), Object.assign({
       today10: () => runQuiz({title:"今日の10問", items:shuffle(battlePool()).slice(0, 10), mode:"normal", back:home}),
       sv: () => runQuiz({title:"語彙 10問", items:pickIdx(VOCAB.length, "v", 10).map(vocabItem), mode:"normal", back:home}),
@@ -2127,6 +2129,7 @@ TABS.vocab = renderVocabPlus;
 G();
 T19.init();
 if(!S.settings.simple1){ S.settings.simple1 = 1; if(S.settings.skin === "tactical") S.settings.skin = "auto"; save(); applySkin(); }
+if(!S.settings.white1){ S.settings.white1 = 1; if(S.settings.skin === "auto" || S.settings.skin === "tactical") S.settings.skin = "light"; save(); applySkin(); }
 
 /* ===== ラウンド戦（5対5・攻撃と防衛を交代する戦術型。どのゲームの名前・キャラクター・地図・絵・字体も写さず、このアプリ用に作った） ===== */
 // 購入フェーズ → ラウンド（正解で相手を1人倒す・まちがい/時間切れで味方が1人倒れる・全滅させた側が勝ち）→ 先に4ラウンドで勝ち。3ラウンド後に攻守交代
