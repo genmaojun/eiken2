@@ -409,6 +409,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .ab small{color:var(--muted);font-size:.72rem;line-height:1.35}
 .ab.ult{border-color:#f2c94c}
 .ab:disabled{opacity:.45}
+/* シンプル版のホーム（ランクと XP の帯は出さない） */
+.top .lv,.top .xpbar{display:none}
+.pre2line{margin:8px 0 0;padding:10px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:.92rem}
+.examline{margin:16px 0 4px;text-align:center;color:var(--muted)}
+.examline b{font-size:1.7rem;color:var(--ink)}
+.bigstart{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%;min-height:110px;margin:12px 0;font-size:1.5rem;font-weight:700;border-radius:16px}
+.bigstart small{font-size:.85rem;font-weight:400;opacity:.9}
+.simplegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.simplegrid .btn{min-height:64px;font-size:1.05rem;font-weight:700}
 </style>
 </head>
 <body>
@@ -442,7 +451,7 @@ window.addEventListener("error", function(e){
 
 <nav class="tabs" aria-label="メニュー">
   <div class="tabs-in">
-    <button class="tab" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>ロビー</button>
+    <button class="tab" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>ホーム</button>
     <button class="tab" data-tab="vocab"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h11a1 1 0 0 1 1 1v13"/><path d="M8 11h5M8 15h5"/></svg>語彙・熟語</button>
     <button class="tab" data-tab="listen"><svg viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/></svg>リスニング</button>
     <button class="tab" data-tab="write"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>作文</button>
@@ -715,7 +724,7 @@ function sentences(t){ return (t.match(/[^.!?]+[.!?]+["”]?/g) || [t]).map(x =>
 const KEY = "eiken2-trainer-v1";
 // 声・速さ・高さ・アクセント・効果音・テーマは WORDCRAFT と同じ既定（速さ 0.85・高さ 1・米・音あり・土）
 const SKINS = [["tactical","タクティカル"],["tsuchi","土"],["midori","緑"],["volley","バレー"],["dark","ダーク"],["light","ライト"],["auto","自動"]];
-const DEF = {v:1, xp:0, days:{}, stats:{}, items:{}, wrong:{}, cards:{}, drafts:{}, done:{}, target:[], g:{}, passtan:{}, settings:{rate:0.85, voice:"", accent:"en-US", pitch:1, sound:true, skin:"tactical", dates:{apply:"2026-12-14", first:"2027-01-24", second:"2027-03-07"}}};
+const DEF = {v:1, xp:0, days:{}, stats:{}, items:{}, wrong:{}, cards:{}, drafts:{}, done:{}, target:[], g:{}, passtan:{}, settings:{rate:0.85, voice:"", accent:"en-US", pitch:1, sound:true, skin:"auto", dates:{apply:"2026-12-14", first:"2027-01-24", second:"2027-03-07"}}};
 function clampRate(r){ r = parseFloat(r) || 0.85; return Math.max(0.5, Math.min(1.2, r)); }
 let canSave = true;
 function fresh(){ return JSON.parse(JSON.stringify(DEF)); }
@@ -759,7 +768,6 @@ function addXP(n){
   const x0 = S.xp;
   S.xp += n; day().xp += n;
   const after = rankOf(S.xp);
-  if(after.idx > before){ sfxLevelUp(); notify("ランクアップ！ " + after.r.ic + " " + after.r.nm); }
   gameXP(x0, S.xp);
 }
 function stat(area){ if(!S.stats[area]) S.stats[area] = {n:0, c:0}; return S.stats[area]; }
@@ -1101,7 +1109,7 @@ function runQuiz(cfg){
     const gained = S.xp - xp0;
     view('<div class="bar"><button class="back" data-act="back">← 戻る</button><span class="prog">結果</span></div>' +
       '<h2 class="qt">' + esc(cfg.title) + "</h2>" +
-      '<section class="card result"><span class="small">正解</span><span class="big">' + score + " / " + n + '</span><span class="small">+' + gained + " XP</span></section>" +
+      '<section class="card result"><span class="small">正解</span><span class="big">' + score + " / " + n + '</span><span class="small">正答率 ' + Math.round(score / n * 100) + "%</span></section>" +
       (wrong.length ? '<section class="card"><h3>間違えた問題（' + wrong.length + '）</h3><ul class="wlist">' + wrong.map(w => '<li><span class="en">' + esc(w.short) + '</span><br><b>答え：</b><span class="' + (w.jaChoices ? "" : "en") + '">' + esc(w.choices[w.ans]) + "</span></li>").join("") + "</ul></section>" : '<section class="card"><p>全問正解。次はもっと速く解けるか試そう。</p></section>') +
       '<div class="row">' + (wrong.length ? '<button class="btn primary" data-act="retry">間違えた問題をもう一度</button>' : "") + '<button class="btn" data-act="back">戻る</button></div>', {
       back: cfg.back,
@@ -1699,7 +1707,10 @@ const PASS = {5:"t8", 10:"av16", 15:"fx6", 20:"av14", 25:"b5", 30:"t9", 35:"av15
 function tierOf(x){ return Math.min(TIERS, Math.floor(x / TIER_XP) + 1); }
 function tierReward(t){ return PASS[t] ? {item:PASS[t]} : {coin: t % 10 === 0 ? 500 : (t % 2 ? 50 : 80)}; }
 function rewardLabel(r){ if(r.item){ const it = itemOf(r.item); return it.ic + " " + it.nm; } return "🪙" + r.coin; }
+// シンプル版（本人 2026/11/8「シンプルで ゲーム性なしでいい」）：ゲームの仕組みは動かさず、お知らせも出さない
+const SIMPLE = true;
 function gameXP(before, after){
+  if(SIMPLE) return;
   const g = G(); g.coins += Math.max(0, after - before);
   for(let t = tierOf(before) + 1; t <= tierOf(after); t++){
     const r = tierReward(t); let msg = "🎟️ シーズンパス Tier " + t + "！ ";
@@ -1741,6 +1752,7 @@ function challenges(){
   return {d:g.ch.dl, w:g.ch.wl};
 }
 function gameEvent(ev, a){
+  if(SIMPLE) return;
   const c = challenges(), done = [];
   [c.d, c.w].forEach(list => list.forEach(x => {
     const d = chDef(x.id); if(!d || d.ev !== ev || x.p >= d.n) return;
@@ -2072,17 +2084,49 @@ function renderVocabPlus(){
   const add = '<div class="menu"><p class="sec">連語・フレーズで覚える</p>' + mi("collocq", "連語クイズ　10問", "make a decision・deal with など（全" + COLLOC.length + "）", "") +
     mi("readmenu", "🌲 長文の森（大問2・3）", "空所の語句・内容一致", "") + "</div>";
   if(menu) menu.insertAdjacentHTML("afterend", add); else $("#view").insertAdjacentHTML("beforeend", add);
-  $("#view").insertAdjacentHTML("beforeend", passtanHtml() + bookCard());
+  $("#view").insertAdjacentHTML("beforeend", '<details class="card"><summary>パス単のチェック表・教材</summary>' + passtanHtml() + bookCard() + "</details>");
   Object.assign(H, {
     collocq: () => runQuiz({title:"連語クイズ　10問", items:pickIdx(COLLOC.length, "c", 10).map(collocItem), mode:"normal", back:renderVocabPlus}),
     readmenu: () => renderRead(() => goTab("vocab")),
     ptcell: el => { const P = S.passtan = S.passtan || {}; const k = el.dataset.k; P[k] = ((P[k] || 0) + 1) % 4; save(); el.dataset.s = P[k]; el.innerHTML = k + "<br><small>" + PSTATE[P[k]] + "</small>"; }
   });
 }
-TABS.home = renderLobby;
+/* ===== シンプルなホーム（本人 2026/11/8「シンプルで ゲーム性なしでいい」「使いずらく わかりにくい シンプル シンプル」） ===== */
+function pre2Line(){
+  const t = today(), web = "2026-11-17", card = "2026-11-24";
+  if(t > card) return "";
+  return '<p class="pre2line">🏁 準2級の結果は ' + (t < web ? "11月17日（火）　あと" + daysUntil(web) + "日" : "ウェブで見られます") + "</p>";
+}
+function renderSimpleHome(){
+  const d = S.settings.dates, df = daysUntil(d.first);
+  const nWrong = Object.keys(S.wrong).filter(id => itemById(id)).length;
+  const home = () => goTab("home");
+  view('<h2 class="sr">ホーム</h2>' + pre2Line() +
+    '<p class="examline">一次試験まで <b>' + (df == null ? "—" : Math.max(df, 0)) + "</b> 日（" + fmtDate(d.first) + "）</p>" +
+    '<button class="btn primary bigstart" data-act="today10">▶ 今日の10問<small>語彙・熟語・連語から</small></button>' +
+    '<div class="simplegrid">' +
+      '<button class="btn" data-act="sv">語彙 10問</button>' +
+      '<button class="btn" data-act="si">熟語 10問</button>' +
+      '<button class="btn" data-act="sc">連語 10問</button>' +
+      '<button class="btn" data-act="s19">1900語 10問</button>' +
+    "</div>" +
+    (nWrong ? '<button class="btn wide" data-act="review">間違えた問題（' + nWrong + "問）</button>" : "") +
+    settingsHtml(), Object.assign({
+      today10: () => runQuiz({title:"今日の10問", items:shuffle(battlePool()).slice(0, 10), mode:"normal", back:home}),
+      sv: () => runQuiz({title:"語彙 10問", items:pickIdx(VOCAB.length, "v", 10).map(vocabItem), mode:"normal", back:home}),
+      si: () => runQuiz({title:"熟語 10問", items:pickIdx(IDIOMS.length, "ib", 10).map(idiomBlankItem), mode:"normal", back:home}),
+      sc: () => runQuiz({title:"連語 10問", items:pickIdx(COLLOC.length, "c", 10).map(collocItem), mode:"normal", back:home}),
+      s19: () => { if(!T19.ready){ notify(T19.state === "loading" ? "WORDCRAFT の単語を読み込み中です。少し待ってからもう一度押してください" : "WORDCRAFT の単語を読み込めませんでした（GitHub の版で開くと使えます）"); return; }
+        runQuiz({title:"1900語 10問", items:T19.items(10), mode:"normal", back:home}); },
+      review: () => runReview(home)
+    }, settingsHandlers()));
+  bindSettings();
+}
+TABS.home = renderSimpleHome;
 TABS.vocab = renderVocabPlus;
 G();
 T19.init();
+if(!S.settings.simple1){ S.settings.simple1 = 1; if(S.settings.skin === "tactical") S.settings.skin = "auto"; save(); applySkin(); }
 
 /* ===== ラウンド戦（5対5・攻撃と防衛を交代する戦術型。どのゲームの名前・キャラクター・地図・絵・字体も写さず、このアプリ用に作った） ===== */
 // 購入フェーズ → ラウンド（正解で相手を1人倒す・まちがい/時間切れで味方が1人倒れる・全滅させた側が勝ち）→ 先に4ラウンドで勝ち。3ラウンド後に攻守交代
